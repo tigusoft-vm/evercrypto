@@ -38,7 +38,7 @@
 *.cmake
 Makefile
 CMakeCache.txt
-CMakeFiles/*
+CMakeFiles/
 
 # keypair
 *pub
