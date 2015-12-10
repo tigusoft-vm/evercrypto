@@ -12,7 +12,13 @@ typedef number<cpp_int_backend<0, 512 * 512 * 10, unsigned_magnitude, checked, v
 
 int main (int argc, char *argv[]) {
   if (argc <= 1) {
-    cout << "please define number of random bytes you want\n";
+    cout << "use --help to show manual\n";
+    return 0;
+  }
+
+  if (!strcmp("--help", argv[1])) {
+    cout << "usage:\n";
+    cout << "./get_random_bytes number_of_bytes\n";
     return 0;
   }
 

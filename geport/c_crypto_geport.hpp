@@ -2,7 +2,7 @@
 #define CRYPTO_C_CRYPTO_GEPORT_H
 #include <boost/multiprecision/cpp_int.hpp>
 #include <string>
-#include "../external/c_random_generator.hpp"
+#include "../external/random_generator/c_random_generator.hpp"
 #include <limits>
 
 using namespace boost::multiprecision;

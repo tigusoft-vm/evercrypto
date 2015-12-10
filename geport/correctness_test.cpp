@@ -10,7 +10,7 @@
 #include <atomic>
 #include <boost/multiprecision/cpp_int.hpp>
 #include "c_crypto_geport.hpp"
-#include "../external/c_random_generator.hpp"
+#include "../external/random_generator/c_random_generator.hpp"
 #include "../external/sha_src/sha256.hpp"
 #include "../external/sha_src/sha512.hpp"
 
@@ -214,7 +214,7 @@ void correctness_test (size_t size) {
   c_crypto_geport_def::signature_t signature, different_signature;
 
   for (size_t i = 0; i < size; ++i, ++tests_counter) {
-    message = generate_random_string((size_t)(rand() % 50) + 5);
+    message = generate_random_string((rand() % 50) + 5); // TODO
     signature = c_crypto_geport_def::sign(message, Private_key);
 
     if (!c_crypto_geport_def::verify_sign(message, signature, public_key)) {
