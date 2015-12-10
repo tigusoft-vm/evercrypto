@@ -1,5 +1,3 @@
-/* See the LICENSE.txt for license information */
-
 #ifndef CRYPTO_C_CRYPTO_GEPORT_H
 #define CRYPTO_C_CRYPTO_GEPORT_H
 #include <boost/multiprecision/cpp_int.hpp>
@@ -13,7 +11,7 @@ using std::numeric_limits;
 
 template <size_t hash_length,
         size_t log2_hash_length,
-        number<cpp_int_backend<hash_length * 2, hash_length * 2, unsigned_magnitude, unchecked, void>> hash_function (const string &)>
+        number<cpp_int_backend<0, hash_length * 2, unsigned_magnitude, unchecked, void>> hash_function (const string &)>
 class c_crypto_geport {
 public:
     typedef number<cpp_int_backend<hash_length * 2, hash_length * 2, unsigned_magnitude, unchecked, void>> long_type;

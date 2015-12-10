@@ -8,6 +8,7 @@
 #include <thread>
 #include <mutex>
 #include <atomic>
+#include <boost/multiprecision/cpp_int.hpp>
 #include "c_crypto_geport.hpp"
 #include "../external/c_random_generator.hpp"
 #include "../external/sha_src/sha256.hpp"
@@ -21,12 +22,13 @@ using std::list;
 using std::thread;
 using std::mutex;
 using std::atomic;
+using std::stoi;
+using namespace boost::multiprecision;
 
-typedef number<cpp_int_backend<512 * 2, 512 * 2, unsigned_magnitude, unchecked, void>> long_type; // TODO
+typedef number<cpp_int_backend<0, 512 * 2, unsigned_magnitude, unchecked, void>> long_type;
 typedef c_crypto_geport<512, 9, sha512<long_type>> c_crypto_geport_def;
 
 atomic<size_t> tests_counter(0);
-atomic<size_t> number_of_collisions(0);
 atomic<bool> is_wrong(false);
 int number_of_threads;
 
@@ -262,7 +264,7 @@ void correctness_test (size_t size) {
   }
 }
 
-void test () {
+void start_testing () {
   size_t rgt_size = 10000;
   size_t c_size = 10000;
   random_generator_test(rgt_size);
@@ -272,20 +274,16 @@ void test () {
 int main (int argc, char *argv[]) {
   ios_base::sync_with_stdio(false);
 
-  std::cerr << "============================================" << std::endl;
-  std::cerr << "The geport testing program - part of AntiNet.org project" << std::endl;
-  std::cerr << "============================================" << std::endl;
-  std::cerr << "WARNING: This is a very early pre-alpha, do not use this!" << std::endl;
-  std::cerr << "Do not even run this at any real user, it likely contains errors, UBs, or exploits!" << std::endl;
-  std::cerr << "Test on separate user/environment until we have a tested version." << std::endl;
-  std::cerr << "============================================" << "\n" << std::endl;
-
   if (argc <= 1) {
     cout << "please define number of theards to run test\n";
     return 0;
   }
 
-  number_of_threads = atoi(argv[1]);
+  try { number_of_threads = stoi(argv[1]); }
+  catch (...) {
+    cout << "please define correct number of theards to run test\n";
+    return 0;
+  }
 
   if (number_of_threads <= 0) {
     cout << "please define correct number of theards to run test\n";
@@ -295,7 +293,7 @@ int main (int argc, char *argv[]) {
   list<thread> Threads;
 
   for (int i = 0; i < number_of_threads; ++i)
-    Threads.emplace_back(test);
+    Threads.emplace_back(start_testing);
 
   for (auto &t : Threads)
     t.join();

@@ -46,7 +46,7 @@ void show_help () {
 
 void show_preamble () {
   cerr << "============================================\n";
-  cerr << "The geport testing program - part of AntiNet.org project\n";
+  cerr << "The geport testing program\n";
   cerr << "============================================\n";
   cerr << "WARNING: This is a very early pre-alpha, do not use this!\n";
   cerr << "Do not even run this at any real user, it likely contains errors, UBs, or exploits!\n";

@@ -47,6 +47,7 @@ CMakeFiles/
 
 # executable
 *geport_implementation
+*get_random_bytes
 
-# TODO file
+# TO DO file
 *TODO*
