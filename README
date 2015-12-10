@@ -1,0 +1,7 @@
+correctness_test.cpp app to test correctness of geport implementation without using a files.
+
+main.cpp main app, use it to sign your files, generate keypair etc
+
+compile it with
+$ cmake . && make
+you can change whether compile main app or correctness_test in CMakeLists.txt

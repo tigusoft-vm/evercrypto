@@ -1,0 +1,52 @@
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# CLion IDE
+.clion
+.idea
+
+# temporary files
+*~
+
+# CMake files
+*.cmake
+Makefile
+CMakeCache.txt
+CMakeFiles/*
+
+# keypair
+*pub
+*sig
+*priv
+
+# executable
+*geport_implementation
+
+# TODO file
+*TODO*
