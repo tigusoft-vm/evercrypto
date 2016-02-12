@@ -11,6 +11,7 @@
 #include <streambuf>
 #include <memory>
 #include <chrono>
+#include <iomanip>
 
 using std::cout;
 using std::cerr;
@@ -190,13 +191,23 @@ string get_current_time () {
   auto in_time_t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 
   std::stringstream ss;
-  ss << std::put_time(std::localtime(&in_time_t), "%Y-%m-%d %X");
+
+  ss << "(time put not implemented)";
+//  ss << std::put_time(std::localtime(&in_time_t), "%Y-%m-%d %X"); // does not work on Debian 8? Needs gcc >= 5
+
   return ss.str();
 }
 
-int main (int argc, char *argv[]) {
+int main (int argc, const char *argv[]) {
   ios_base::sync_with_stdio(false);
   const string version = "v0.1 beta, 10.12.2015";
+
+  if (argc >= 1) {
+    if (string(argv[1]) == string("--dev")) {
+      devel_test();
+      return 0;
+    }
+  }
 
   if (argc < 2) {
     cout << "use --help to show manual\n";

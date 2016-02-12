@@ -3,60 +3,13 @@
 #include <boost/multiprecision/cpp_int.hpp>
 #include <string>
 #include "../external/random_generator/c_random_generator.hpp"
+#include "../external/sha_src/sha512.hpp"
 #include <limits>
 
 using namespace boost::multiprecision;
 using std::string;
 using std::numeric_limits;
 
-
-// the engine of evercrypto, providing usable higher level functions:
-class c_evercrypto {
-
-	public:
-
-		bool check_sign(const PUBKEY,  const SIGNATURE &, const MESSAGE &) {
-			// using: static bool verify_sign (const string &msg, const signature_t &signature, const public_key_t &pub_key) {
-
-			bool ok = 0;
-			
-			if (rtti PUBKEY ... == geport_sha512) {
-				if (rtti MESSAGE == geport_sha512) {
-					ok = c_crypto_geport<SHA512>::verify_sign(MESSAGE, SIGNATURE, ...)
-				}
-			}
-
-			return 1;
-		}
-
-		bool generate_keypair();
-		SIGNATUR sign(const PRIVKEY &, const MESSAGE &);
-
-		bool check_sign(const PUBKEY_FINGERPRIT &, const SIGNATURE &, const MESSAGE &) { return check_sign( find_pubkey_by_hash(PUBKEY_FINGERPRIT) , SIGNATURE , MESSAGE ); }  
-
-};	
-
-
-downloader::action() {
-	auto x = evercrypto.load_pubkey( data_stream ); // e.g.: will be instance of c_evercrypto_pubkey_geport<SHA512> (in runtime)
-	auto y = evercrypto.load_signature( data_sream ); // e.g. c_evercrypto_sign<SHA512>
-
-	bool ok = check_sign(x,y);
-
-}
-
-
-class c_evercrypto_sign; ... 
-class c_evercrypto_sign_geport : c_evercrypto_sign ;
-class c_evercrypto_sign_geport<T> : c_evercrypto_sign_geport; ... {  public: pop_cout ...  Signature[] .... ; }
-
-class c_evercrypto_pubkey;
-class c_evercrypto_pubkey_geport : c_evercrypto_pubkey ;
-class c_evercrypto_pubkey_geport<T> : c_evercrypto_pubkey_geport ;
-
-class c_evercrypto_privkey;
-class c_evercrypto_privkey_geport : c_evercrypto_privkey ;
-class c_evercrypto_privkey_geport<T> : c_evercrypto_privkey_geport ;
 
 
 template <size_t hash_length, size_t log2_hash_length, string hash_function (const string &)>
