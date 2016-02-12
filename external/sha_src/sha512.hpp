@@ -1,6 +1,7 @@
 #ifndef SHA512_H
 #define SHA512_H
 #include <string>
+#include <string.h>
 
 class SHA512 {
 protected:

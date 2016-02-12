@@ -6,12 +6,11 @@ set(CMAKE_CXX_FLAGS
         )
 
 set(SOURCE_FILES
-        correctness_test.cpp
-#        main.cpp
+ #       correctness_test.cpp
+        main.cpp
         ../external/sha_src/sha512.cpp ../external/sha_src/sha512.hpp ../external/sha_src/sha256.cpp ../external/sha_src/sha256.hpp #sha libs
         c_crypto_geport.hpp #geport signature
-        ../external/random_generator/c_random_generator.hpp
-        )
+        ../external/random_generator/c_random_generator.hpp)
 
 add_executable(
         geport_implementation ${SOURCE_FILES}

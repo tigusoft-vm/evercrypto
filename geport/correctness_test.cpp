@@ -26,7 +26,7 @@ using std::stoi;
 using namespace boost::multiprecision;
 
 typedef number<cpp_int_backend<0, 512 * 2, unsigned_magnitude, unchecked, void>> long_type;
-typedef c_crypto_geport<512, 9, sha512<long_type>> c_crypto_geport_def;
+typedef c_crypto_geport<512, 9, sha512<string>> c_crypto_geport_def;
 
 atomic<size_t> tests_counter(0);
 atomic<bool> is_wrong(false);
@@ -207,46 +207,46 @@ void print_signed_msg (const c_crypto_geport_def::signature_t &signature, const 
 
 void correctness_test (size_t size) {
   size_t jump = 100;
-  c_crypto_geport_def::long_type Private_key[c_crypto_geport_def::signature_or_private_key_length];
-  c_crypto_geport_def::public_key_t public_key = c_crypto_geport_def::generate_keypair(Private_key), different_public_key;
+  auto keypair = c_crypto_geport_def::generate_keypair();
+  c_crypto_geport_def::public_key_t different_public_key;
 
   string message, different_message;
   c_crypto_geport_def::signature_t signature, different_signature;
 
   for (size_t i = 0; i < size; ++i, ++tests_counter) {
     message = generate_random_string((rand() % 50) + 5); // TODO
-    signature = c_crypto_geport_def::sign(message, Private_key);
+    signature = c_crypto_geport_def::sign(message, keypair.private_key);
 
-    if (!c_crypto_geport_def::verify_sign(message, signature, public_key)) {
+    if (!c_crypto_geport_def::verify_sign(message, signature, keypair.public_key)) {
       is_wrong = true;
       cout << "-------------------------------------------------------------\n";
       cout << "veryfing correct message gone wrong" << endl;
       cout << "message: " << message << endl << "signature:\n";
-      print_signed_msg(signature, public_key);
+      print_signed_msg(signature, keypair.public_key);
       return;
     }
 
     for (size_t counter = 0; counter < 20; ++counter) {
       different_signature = generate_different_signature(signature);
       different_message = generate_different_string(message);
-      different_public_key = generate_different_public_key(public_key);
+      different_public_key = generate_different_public_key(keypair.public_key);
 
-      if (c_crypto_geport_def::verify_sign(different_message, signature, public_key)) {
+      if (c_crypto_geport_def::verify_sign(different_message, signature, keypair.public_key)) {
         is_wrong = true;
         cout << "-------------------------------------------------------------\n";
-        cout << "veryfing wrong message gone is OK" << endl;
+        cout << "veryfing wrong message gone wrong" << endl;
         cout << "message: " << message << endl;
         cout << "wrong message: " << different_message << endl << "signature: \n";
-        print_signed_msg(signature, public_key);
+        print_signed_msg(signature, keypair.public_key);
         return;
       }
 
-      if (c_crypto_geport_def::verify_sign(message, different_signature, public_key)) {
+      if (c_crypto_geport_def::verify_sign(message, different_signature, keypair.public_key)) {
         is_wrong = true;
         cout << "-------------------------------------------------------------\n";
         cout << "veryfing correct message with wrong signature is OK" << endl;
         cout << "message: " << message << endl << "wrong signature:\n";
-        print_signed_msg(signature, public_key);
+        print_signed_msg(signature, keypair.public_key);
         return;
       }
 
@@ -254,7 +254,7 @@ void correctness_test (size_t size) {
         cout << "---I'm not sure if this error definitely shouldn't happened---\n";
         cout << "veryfing correct message with wrong signature AND wrong public key is OK" << endl;
         cout << "message: " << message << endl << "wrong signature:\n";
-        print_signed_msg(signature, public_key);
+        print_signed_msg(signature, keypair.public_key);
       }
     }
 
@@ -274,19 +274,19 @@ void start_testing () {
 int main (int argc, char *argv[]) {
   ios_base::sync_with_stdio(false);
 
-  if (argc <= 1) {
-    cout << "please define number of theards to run test\n";
-    return 0;
-  }
+//  if (argc <= 1) {
+//    cout << "please define number of threads to run test\n";
+//    return 0;
+//  }
 
-  try { number_of_threads = stoi(argv[1]); }
+  try { number_of_threads = 4; }
   catch (...) {
-    cout << "please define correct number of theards to run test\n";
+    cout << "please define correct number of threads to run test\n";
     return 0;
   }
 
   if (number_of_threads <= 0) {
-    cout << "please define correct number of theards to run test\n";
+    cout << "please define correct number of threads to run test\n";
     return 0;
   }
 

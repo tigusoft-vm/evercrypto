@@ -27,7 +27,7 @@ using std::runtime_error;
 using std::unique_ptr;
 
 typedef number<cpp_int_backend<512 * 2, 512 * 2, unsigned_magnitude, unchecked, void>> long_type;
-typedef c_crypto_geport<512, 9, sha512<long_type>> c_crypto_geport_def;
+typedef c_crypto_geport<512, 9, sha512<string>> c_crypto_geport_def;
 
 void show_help () {
   cout << "-g\t--gen-key [priv_key pub_key]\t\t\tgenerate keypair and write it to given files" << endl;
@@ -65,21 +65,21 @@ string file_to_string (const string &filename) {
   return result;
 }
 
-unique_ptr<long_type []> get_private_key_from_file (const string &filename) { // it's good to return something similar to char []
+c_crypto_geport_def::private_key_t get_private_key_from_file (const string &filename) {
   ifstream file(filename);
   if (!file.good()) {
     throw runtime_error("error while opening a file [" + filename + "]");
   }
 
-  unique_ptr<long_type []> Private_key(new long_type[c_crypto_geport_def::signature_or_private_key_length]);
+  c_crypto_geport_def::private_key_t result;
   for (size_t i = 0; i < c_crypto_geport_def::signature_or_private_key_length; ++i) {
     if (file.eof()) {
       throw runtime_error(string("error while reading a file [") + filename + "] : end of file");
     }
-    file >> Private_key[i];
+    file >> result[i];
   }
 
-  return Private_key;
+  return result;
 }
 
 c_crypto_geport_def::signature_t get_signature_from_file (const string &filename) {
@@ -137,12 +137,12 @@ void generate_key (const string &priv_key_filename, const string &pub_key_filena
   cerr << "YOU SHOULD ENCRYPT IT USING FOR EXAMPLE PGP" << endl;
 
   c_crypto_geport_def::long_type Private_key[c_crypto_geport_def::signature_or_private_key_length];
-  auto public_key = c_crypto_geport_def::generate_keypair(Private_key);
+  auto keypair = c_crypto_geport_def::generate_keypair();
 
   for (size_t i = 0; i < c_crypto_geport_def::signature_or_private_key_length; ++i) {
-    priv_file << Private_key[i] << '\n';
+    priv_file << keypair.private_key[i] << '\n';
   }
-  pub_file << public_key << '\n';
+  pub_file << keypair.public_key << '\n';
 }
 
 void sign (const string &filename, const string &priv_key_filename, const string &signature_filename, bool skip = false) {
@@ -163,7 +163,7 @@ void sign (const string &filename, const string &priv_key_filename, const string
   }
 
   c_crypto_geport_def::signature_t signature =
-          c_crypto_geport_def::sign(file_to_string(filename), get_private_key_from_file(priv_key_filename).get());
+          c_crypto_geport_def::sign(file_to_string(filename), get_private_key_from_file(priv_key_filename));
 
   signature_file << signature.pop_count << '\n';
   for (size_t i = 0; i < c_crypto_geport_def::signature_or_private_key_length; ++i) {
@@ -181,7 +181,7 @@ void check_signature (const string &filename, const string &signature_filename, 
 }
 
 void check_public_key (const string &priv_key_filename, const string &pub_key_filename) {
-  bool is_ok = c_crypto_geport_def::generate_public_key(get_private_key_from_file(priv_key_filename).get()) == get_public_key_from_file(pub_key_filename);
+  bool is_ok = c_crypto_geport_def::generate_public_key(get_private_key_from_file(priv_key_filename)) == get_public_key_from_file(pub_key_filename);
   if (is_ok) cout << "public key is OK\n";
   else cout << "public key is WRONG\n";
 }

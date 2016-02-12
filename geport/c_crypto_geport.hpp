@@ -9,37 +9,52 @@ using namespace boost::multiprecision;
 using std::string;
 using std::numeric_limits;
 
-template <size_t hash_length,
-        size_t log2_hash_length,
-        number<cpp_int_backend<0, hash_length * 2, unsigned_magnitude, unchecked, void>> hash_function (const string &)>
+template <size_t hash_length, size_t log2_hash_length, string hash_function (const string &)>
 class c_crypto_geport {
 public:
     typedef number<cpp_int_backend<hash_length * 2, hash_length * 2, unsigned_magnitude, unchecked, void>> long_type;
-    typedef long_type public_key_t;
+
     static constexpr size_t signature_or_private_key_length = hash_length + log2_hash_length;
     static_assert(1 << log2_hash_length >= hash_length, "invalid lengths provided");
+    static_assert(numeric_limits<size_t>::max() >= log2_hash_length, "log2(hash length) seems to be too huge");
 
     struct signature_t {
         size_t pop_count; // this MUST be able to store log2(hash_size) number
-        long_type Signature[signature_or_private_key_length];
+        std::array<long_type, signature_or_private_key_length> Signature;
     };
 
-    static_assert(numeric_limits<size_t>::max() >= log2_hash_length, "log2(hash length) seems to be too huge");
+    typedef long_type public_key_t;
+    typedef long_type hash_t;
+    typedef std::array<long_type, signature_or_private_key_length> private_key_t;
+
+    struct keypair_t {
+        public_key_t public_key;
+        private_key_t private_key;
+    };
 
 private:
     static c_random_generator<long_type> rd_gen;
 
-    static long_type generate_hash (const string &value) { return hash_function(value); }
+    static hash_t generate_hash (const string &value) {
+      string hash = hash_function(value);
+      if (hash.at(0) != '0' || hash.at(1) != 'x') {
+        hash = "0x" + hash;
+      }
+      return long_type(hash);
+    }
 
-    static long_type generate_hash (const long_type &value) { return generate_hash(string(value)); }
+    static hash_t generate_hash (const long_type &value) { return generate_hash(string(value)); }
 
-    static void join_hash (long_type &a, const long_type &b) {
-      a <<= hash_length;
-      a += b;
+    static void join_hash (hash_t &a, const hash_t &b) {
+//      a <<= hash_length;
+//      a += b;
+//      a = generate_hash(a);
+      a = generate_hash(a);
+      a ^= b;
       a = generate_hash(a);
     }
 
-    static size_t pop_count_in_hash (long_type value) {
+    static size_t pop_count_in_hash (hash_t value) {
       size_t counter = 0;
       for (size_t i = 0; i < hash_length; ++i, value >>= 1) {
         if (value & 1)
@@ -51,30 +66,30 @@ private:
 public:
     c_crypto_geport () = default;
 
-    static public_key_t generate_keypair (long_type Private_key[signature_or_private_key_length]) {
+    static keypair_t generate_keypair () {
+      keypair_t keypair;
       for (size_t i = 0; i < signature_or_private_key_length; ++i)
-        Private_key[i] = rd_gen.get_random((signature_or_private_key_length) / 8);
+        keypair.private_key[i] = rd_gen.get_random((signature_or_private_key_length) / 8);
 
-      public_key_t public_key = generate_public_key(Private_key);
+      keypair.public_key = generate_public_key(keypair.private_key);
 
-      return public_key;
+      return keypair;
     }
 
-    static public_key_t generate_public_key (const long_type Private_key[signature_or_private_key_length]) {
+    static public_key_t generate_public_key (const private_key_t &private_key) {
       public_key_t public_key = 0;
       for (size_t i = 0; i < signature_or_private_key_length; ++i)
-        join_hash(public_key, generate_hash(generate_hash(Private_key[i])));
+        join_hash(public_key, generate_hash(generate_hash(private_key[i])));
 
       return public_key;
     }
 
-    static signature_t sign (const string &msg, const long_type Private_key[signature_or_private_key_length]) {
-      long_type hashed_msg = generate_hash(msg);
-
+    static signature_t sign (const string &msg, const private_key_t &private_key) {
+      hash_t hashed_msg = generate_hash(msg);
       signature_t signature;
 
       signature.pop_count = pop_count_in_hash(hashed_msg);
-      long_type hashed_private_key;
+      hash_t hashed_private_key;
 
 
       if (signature.pop_count > hash_length / 2) {
@@ -82,17 +97,17 @@ public:
       }
 
       for (size_t i = 0; i < hash_length; ++i) {
-        hashed_private_key = generate_hash(Private_key[i]);
+        hashed_private_key = generate_hash(private_key[i]);
         if (hashed_msg & (1 << i))
-          signature.Signature[i] = Private_key[i];
+          signature.Signature[i] = private_key[i];
         else
           signature.Signature[i] = hashed_private_key;
       }
 
       for (size_t i = hash_length; i < signature_or_private_key_length; ++i) {
-        hashed_private_key = generate_hash(Private_key[i]);
+        hashed_private_key = generate_hash(private_key[i]);
         if (signature.pop_count & (1 << i))
-          signature.Signature[i] = Private_key[i];
+          signature.Signature[i] = private_key[i];
         else
           signature.Signature[i] = hashed_private_key;
       }
@@ -101,9 +116,9 @@ public:
     }
 
     static bool verify_sign (const string &msg, const signature_t &signature, const public_key_t &pub_key) {
-      long_type hashed_msg = generate_hash(msg), tmp;
-      long_type generated_public_key = 0;
-      long_type hashed_signature;
+      hash_t hashed_msg = generate_hash(msg), tmp;
+      public_key_t generated_public_key = 0;
+      hash_t hashed_signature;
 
       if (signature.pop_count != pop_count_in_hash(hashed_msg))
         return false;
