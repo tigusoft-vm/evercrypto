@@ -13,6 +13,12 @@
 #include <chrono>
 #include <iomanip>
 
+#ifdef bool // some C files included to funky stuff like that, we undo it
+	#undef bool
+	#undef true
+	#undef false
+#endif
+
 using std::cout;
 using std::cerr;
 using std::cin;
@@ -216,6 +222,7 @@ int main (int argc, const char *argv[]) {
 
 	if (argc >= 1) {
 		if (string(argv[1]) == string("--dev")) {
+			std::cout << "Foooo" << std::endl;
 			devel_test();
 			return 0;
 		}
