@@ -9,19 +9,11 @@ using std::string;
 using std::ifstream;
 using std::ios_base;
 
-#ifdef TARGET_OS_MAC
-#define RANDOM_DEVICE "" // TODO
-
-#elif defined __linux__
-#define RANDOM_DEVICE "/dev/urandom" // TODO change it to /dev/random
-
-#elif defined _WIN32 || defined __CYGWIN__
-#include <windows.h>
-#include <wincrypt.h>
-
-#elif defined __ANDROID_API__
-#define RANDOM_DEVICE "" // TODO
-
+#if defined _WIN32 || defined __CYGWIN__
+	#include <windows.h>
+	#include <wincrypt.h>
+#else
+	#define RANDOM_DEVICE "/dev/urandom"
 #endif
 
 

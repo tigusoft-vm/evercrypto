@@ -206,7 +206,8 @@ private:
 		return long_type(hash);
 	}
 
-	static hash_t generate_hash (const long_type &value) { return generate_hash(string(value)); }
+	static hash_t generate_hash (const long_type &value) { return generate_hash(value.str()); 
+}
 
 	static void join_hash (hash_t &a, const hash_t &b) {
 		//      a <<= hash_length;
