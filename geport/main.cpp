@@ -220,7 +220,7 @@ int main (int argc, const char *argv[]) {
 	ios_base::sync_with_stdio(false);
 	const string version = "v0.1 beta, 10.12.2015";
 
-	if (argc >= 1) {
+	if (argc > 1) {
 		if (string(argv[1]) == string("--dev")) {
 			std::cout << "Foooo" << std::endl;
 			devel_test();
