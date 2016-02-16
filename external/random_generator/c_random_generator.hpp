@@ -15,8 +15,9 @@ using std::ios_base;
 #elif defined __linux__
 #define RANDOM_DEVICE "/dev/urandom" // TODO change it to /dev/random
 
-#elif defined _WIN32 || defined _WIN64
-#define RANDOM_DEVICE "" // TODO
+#elif defined _WIN32 || defined __CYGWIN__
+#include <windows.h>
+#include <wincrypt.h>
 
 #elif defined __ANDROID_API__
 #define RANDOM_DEVICE "" // TODO
@@ -33,7 +34,7 @@ public:
 	c_random_generator () = default;
 
 	~c_random_generator () = default;
-
+#if !defined(__CYGWIN__) && !defined(_WIN32)
 	static type get_random (size_t length_in_bytes) {
 		if (!m_reader.good())
 			throw std::runtime_error("some error occured while reading from random number generator device");
@@ -50,12 +51,23 @@ public:
 		}
 		return random;
 	}
+#else
+	static type get_random (size_t length_in_bytes) {
+		type random = 0;
+		HCRYPTPROV prov;
+		CryptAcquireContext(&prov, nullptr, nullptr, PROV_RSA_FULL, 0);
+		CryptGenRandom(prov, sizeof(random), (BYTE *)&random);
+		return random;
+	}
+#endif
 };
 
 
+#if !defined(__CYGWIN__) && !defined(_WIN32)
 template <typename type>
 std::ifstream c_random_generator<type>::m_reader (
 
 RANDOM_DEVICE, ios_base::in);
+#endif
 
 #endif //CRYPTO_RANDOM_GENERATOR_HPP
